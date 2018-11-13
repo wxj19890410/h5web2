@@ -11,13 +11,13 @@
             style="margin-right:30px;"
             clearable>
           </el-input>
-          <el-button icon="el-icon-search"  circle></el-button>
+          <el-button icon="el-icon-search"  circle  @click = "searchData()"></el-button>
         </div>
-        <el-button type="primary" style="height:40px;" round>更新数据</el-button>
+        <el-button type="primary" style="height:40px;" round @click="refreshGroup()">更新数据</el-button>
       </div>
       <div style="width:100%;margin-left:0%;">
         <template >
-          <el-table :data="tableData" stripe border :default-sort = "{prop: 'date', order: 'descending'}" ><el-table-column prop="department" label="部门"></el-table-column><el-table-column prop="number" label="部门人数"></el-table-column><el-table-column prop="Date" sortable label="计算更新时间"></el-table-column>
+          <el-table :data="tableData" stripe border :default-sort = "{prop: 'date', order: 'descending'}" ><el-table-column prop="name" label="班组"></el-table-column><el-table-column prop="number" label="部门人数"></el-table-column><el-table-column prop="Date" sortable label="计算更新时间"></el-table-column>
           </el-table>
         </template>
       </div>
@@ -26,12 +26,10 @@
         @current-change="handleCurrentChange"
         :current-page="currentPage"
         style="margin-top:20px;"
-        :page-sizes="[2, 4, 6, 8]"
-        :page-size="100"
+        :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="tableData.length">
+        :total="count">
       </el-pagination>
- 
     </div>
  
   </div>
@@ -44,19 +42,11 @@ export default {
   name: 'departmentList',
   data () {
     return {
-      options: [{
-        value: '选项1',
-        label: '生产部门'
-      }, {
-        value: '选项2',
-        label: '非生产部门'
-      },],
-      value: '生产部门',
-      tableData: [{department:"管理部",number:'56',Date:"2018/04/14"},{department:"技术部",number:'56',Date:"2018/04/14"},{department:"市场部",number:'56',Date:"2018/04/14"},{department:"设计部",number:'56',Date:"2018/04/14"},{department:"管理部",number:'56',Date:"2018/04/14"},{department:"销售部",number:'56',Date:"2018/04/14"},{department:"货运部",number:'56',Date:"2018/04/14"},{department:"会计部",number:'56',Date:"2018/04/14"},],
-      valueMonth:'',
-      inputSearch:'',
-      currentPage:2,
-    
+      count: 0,
+      pageSize: 20,
+      currentPage: 1,
+      tableData: [],
+      inputSearch:''
     }
   },
   mounted(){
@@ -64,19 +54,66 @@ export default {
     $(".component-page").height($(window).height()-120)
     this.animatePage()
   },
+  created () {
+    this.initData()
+  },
   methods:{
+    refreshGroup () {
+      this.$http.get('/huoli/wxData/refreshTag').then(({ data }) => {
+        this.initData()
+        if (data && data >= 0 ) {
+          this.$notify.success({
+            type: 'success',
+            message: '现有班组' + data + '个'
+          })
+        }else if (data === 0 ) {
+          this.$notify.success({
+            type: 'error',
+            message: '现有没有班组!'
+          })
+        } else {
+          this.$notify.error({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
+    searchData () {
+      this.initData()
+    },
+    initData () {
+      const params = {}
+      params.inputSearch = this.inputSearch
+      params.avg = '0'
+      params.start = (this.currentPage - 1) * this.pageSize
+      params.length = this.pageSize
+      this.$http.get('/huoli/org/groupDataGrid', {params: params}).then(({ data }) => {
+        if (data) {
+          this.tableData = data.rows
+          this.count = data.count
+        } else {
+          this.$message({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
     animatePage(){
       $(".component-page").animate({
       　　"opacity":"1",
       　　"left":"220px"
       },500);
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+    handleSizeChange (val) {
+      this.currentPage = val
+      this.initData()
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
-    },
+    handleCurrentChange (val) {
+      this.currentPage = val
+      this.initData()
+    }
   }
 }
 </script>

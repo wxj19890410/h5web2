@@ -16,7 +16,7 @@
         <div id="myChart2" :style="{width: '60%', height: '400px'}"></div>
       </div>
       <div class="title1">
-        2018年各项指数值
+        {{timeYear}}年各项指数值
         <div style="position:absolute;right:20px;top:0;">
           <el-date-picker
             v-model="valueYear"
@@ -30,17 +30,17 @@
         <div class="ranking-all">
           <div class="ranking-all-title" style=""><span>公司总排名</span><span>总值</span></div>
           <ul class="ranking-all-ul">
-            <li v-for="(item,index) in 10" style="display:flex;justify-content:space-between;">
-              <span>第{{index+1}}名： 李小花</span>
-              <span>34</span>
+            <li v-for="(item,index) in rankData1" style="display:flex;justify-content:space-between;">
+              <span>第{{index+1}}名： {{item.name}}</span>
+              <span>{{item.sumData}}</span>
             </li>
           </ul>
         </div>
       </div>
-      <div class="title1" >7月部门排名  
+      <div class="title1" >{{time2}}部门排名  
         <div style="position:absolute;right:20px;top:0;">
           <el-date-picker
-            v-model="valueMonth"
+            v-model="valueMonth2"
             type="month"
             placeholder="选择月">
           </el-date-picker>
@@ -51,27 +51,27 @@
         <div style="border-radius:10px;overflow:hidden;border:1px solid #E9ECF3;width:48%;">
           <div class="part3-title" style="">生产部门</div>
           <template>
-            <el-table :data="tableData" stripe border :default-sort = "{prop: 'date', order: 'descending'}" ><el-table-column prop="ID" label="排名" ></el-table-column><el-table-column prop="Name" label="姓名" ></el-table-column><el-table-column prop="Culture"  label="企业文化指数"></el-table-column><el-table-column prop="Study"  label="学习成长指数"></el-table-column><el-table-column prop="Change"  label="精益改善指数" ></el-table-column><el-table-column prop="Reading"  label="读书指数" ></el-table-column><el-table-column prop="HSE"  label="HSE指数"></el-table-column><el-table-column prop="Attendance"  label="出勤指数"></el-table-column><el-table-column prop="Average"  label="平均指数"></el-table-column>
+            <el-table :data="deptData1" stripe border :default-sort = "{prop: 'date', order: 'descending'}" ></el-table-column><el-table-column prop="name" label="姓名" ></el-table-column><el-table-column prop="culture"  label="企业文化指数"></el-table-column><el-table-column prop="study"  label="学习成长指数"></el-table-column><el-table-column prop="improve"  label="精益改善指数" ></el-table-column><el-table-column prop="read"  label="读书指数" ></el-table-column><el-table-column prop="hse"  label="HSE指数"></el-table-column><el-table-column prop="attendance"  label="出勤指数"></el-table-column><el-table-column prop="avg"  label="平均指数"></el-table-column>
             </el-table>
           </template>
         </div>
         <div style="border-radius:10px;overflow:hidden;border:1px solid #E9ECF3;width:48%;">
           <div class="part3-title" style="">非生产部门</div>
           <template>
-            <el-table :data="tableData" stripe border :default-sort = "{prop: 'date', order: 'descending'}" ><el-table-column prop="ID" label="排名" ></el-table-column><el-table-column prop="Name" label="姓名" ></el-table-column><el-table-column prop="Culture"  label="企业文化指数"></el-table-column><el-table-column prop="Study"  label="学习成长指数"></el-table-column><el-table-column prop="Change"  label="精益改善指数" ></el-table-column><el-table-column prop="Reading"  label="读书指数" ></el-table-column><el-table-column prop="HSE"  label="HSE指数"></el-table-column><el-table-column prop="Attendance"  label="出勤指数"></el-table-column><el-table-column prop="Average"  label="平均指数"></el-table-column>
+            <el-table :data="deptData2" stripe border :default-sort = "{prop: 'date', order: 'descending'}" ><el-table-column prop="name" label="姓名" ></el-table-column><el-table-column prop="culture"  label="企业文化指数"></el-table-column><el-table-column prop="study"  label="学习成长指数"></el-table-column><el-table-column prop="improve"  label="精益改善指数" ></el-table-column><el-table-column prop="read"  label="读书指数" ></el-table-column><el-table-column prop="hse"  label="HSE指数"></el-table-column><el-table-column prop="attendance"  label="出勤指数"></el-table-column><el-table-column prop="avg"  label="平均指数"></el-table-column>
             </el-table>
           </template>
         </div>
       </div>
       <div class="title1" style="margin-top:50px;">
-        班组活力指数走势图
+        {{timeYear}}年班组活力指数走势图
         <div style="position:absolute;right:20px;top:0;">
-          <el-select v-model="value" placeholder="请选择">
+          <el-select v-model="tagValue" placeholder="请选择">
             <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              v-for="item in tagOptions"
+              :key="item.tagid"
+              :label="item.name"
+              :value="item.tagid">
             </el-option>
           </el-select>
         </div>
@@ -94,51 +94,155 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      time:"2018年7月",
-      valueMonth:'',
-      valueYear:'',
-      tableData: [{ID:"第一名",Name:"王大妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},{ID:"第二名",Name:"王二妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},{ID:"第三名",Name:"王三妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},{ID:"第四名",Name:"王四妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},{ID:"第五名",Name:"王五妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},{ID:"第六名",Name:"王六妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},{ID:"第七名",Name:"王七妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},{ID:"第八名",Name:"王八妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},{ID:"第九名",Name:"王九妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},{ID:"第十名",Name:"王十妈",Culture:"45",Study:"65",Change:"76",Reading:"78",HSE:"32",Attendance:"45",Average:'66'},],
-      options: [{
-          value: '选项1',
-          label: '班组1'
-        }, {
-          value: '选项2',
-          label: '班组2'
-        }, {
-          value: '选项3',
-          label: '班组3'
-        }, {
-          value: '选项4',
-          label: '班组4'
-        }, {
-          value: '选项5',
-          label: '班组5'
-        }],
-        value: '班组1'
+      time: '',
+      valueMonth: '',
+      dataChart1: [],
+      dataChart2: [],
+      timeYear: '',
+      valueYear: '',
+      seriesData: [],
+      rankData1: [],
+      tagOptions: [],
+      tagValue: '1',
+      time2: '',
+      valueMonth2: '',
+      deptData1: [],
+      deptData2: [],
+      seriesData2: [],
+      dataChart3: []
     }
   },
   watch:{
     valueMonth:function(){
       var datetime=this.valueMonth.getFullYear() + '年' + (this.valueMonth.getMonth() + 1) +"月";
-      console.log(datetime)
       this.time = datetime
-      this.drawLine1();
-      this.drawLine2();
-      
+      this.initData()
+    },
+    valueYear: function() {
+      this.timeYear = this.valueYear.getFullYear()
+      this.yearData()
+      this.getTagData()
+    },
+    valueMonth2:function(){
+      var datetime=this.valueMonth2.getFullYear() + '年' + (this.valueMonth2.getMonth() + 1) +"月";
+      this.time2 = datetime
+      this.findDeptRank()
+    },
+    tagValue:function(){
+      this.getTagData()
     }
   },
+  created () {
+    let now = new Date()
+    let yearDate = now.getFullYear()
+    let monthDate = now.getMonth()
+    const today = {}
+    today.year = yearDate
+    today.month = yearDate + '年'+ monthDate +"月"
+    today.monthDate = yearDate + '-'+ monthDate
 
+    this.time = today.month
+    this.valueMonth = now
+    this.timeYear = today.year
+    this.valueYear = now
+    this.time2 = today.month
+    this.valueMonth2 = now
+ 
+    this.initData()
+    this.yearData()
+    this.findGroupMap()
+    this.findDeptRank()
+  },
   mounted(){
     $(".component-page").width($(window).width()-240)
     $(".component-page").height($(window).height()-120)
-    this.animatePage();
-    this.drawLine1();
-    this.drawLine2();
-    this.drawLine3();
-    this.drawLine4();
-    this.drawLine5();
+    this.animatePage()
   },
   methods:{
+    findDeptRank () {
+      const params = {}
+      params.month = this.time2
+      this.$http.get('/huoli/htChart/findDeptRank', {params: params}).then(({ data }) => {
+        if (data) {
+          this.deptData1 = data.data1
+          this.deptData2 = data.data2
+        } else {
+          this.$message({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
+    findGroupMap () {
+      const params = {}
+      this.$http.get('/huoli/org/findGroupMap', {params: params}).then(({ data }) => {
+        if (data) {
+          //获取班组数据
+          this.tagOptions = data
+          if (data.length > 0) {
+            this.tagValue = data[0].tagid
+          }
+          this.getTagData()
+        } else {
+          this.$message({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
+    getTagData () {
+      const params = {}
+      params.timeYear = this.timeYear
+      params.tagid = this.tagValue
+      this.$http.get('/huoli/htChart/getTagData', {params: params}).then(({ data }) => {
+        if (data) {
+          this.seriesData2 = data.series
+          this.dataChart3 = data.data2
+          this.drawLine4()
+          this.drawLine5()
+        } else {
+          this.$message({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
+    yearData () {
+      const params = {}
+      params.timeYear = this.timeYear
+      this.$http.get('/huoli/htChart/yearData', {params: params}).then(({ data }) => {
+        if (data) {
+          this.seriesData = data.series
+          this.rankData1 = data.rankData
+          this.drawLine3()
+        } else {
+          this.$message({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
+    initData () {
+      const params = {}
+      params.month = this.time
+      this.$http.get('/huoli/htChart/dataChart12', {params: params}).then(({ data }) => {
+        if (data) {
+          this.dataChart1 = data.chart1
+          this.dataChart2 = data.chart2
+          this.drawLine1()
+          this.drawLine2()
+        } else {
+          this.$message({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
     changeMonth(){
       console.log(this.valueMonth)
     },
@@ -162,7 +266,7 @@ export default {
         },
         xAxis: {
             type: 'category',
-            data: ['企业文化', '学习指数', '精益指数', '读书指数', 'HSE', '出勤指数', ],
+            data: ['学习指数', '读书指数', '企业文化', '出勤指数', 'HSE', '精益指数', ],
             axisTick: {
                 alignWithLabel: true
             }
@@ -177,7 +281,7 @@ export default {
           }
         },
         series: [{
-            data: [12, 20, 15, 80, 70, 11,],
+            data: this.dataChart1,
             type: 'bar',
             markLine: {
                 data: [
@@ -220,13 +324,7 @@ export default {
                 type: 'pie',
                 radius : '55%',
                 center: ['40%', '50%'],
-                data: [ {value:33, name:'企业文化'},
-                        {value:31, name:'学习指数'},
-                        {value:23, name:'精益指数'},
-                        {value:13, name:'读书指数'},
-                        {value:15, name:'HSE'},
-                        {value:15, name:'出勤指数'},
-                      ],
+                data: this.dataChart2,
                 itemStyle: {
                     emphasis: {
                         shadowBlur: 10,
@@ -274,14 +372,7 @@ export default {
                     formatter: '{value}'
                 }
             },
-            series: [
-                {name:'企业文化',type:'line',data:[10, 21, 32, 41, 52, 61, 72,81,78,67,56,45],},
-                {name:'学习指数',type:'line',data:[55, 55, 55, 55, 55, 55, 55,55,55,77,88,55],},
-                {name:'精益指数',type:'line',data:[20, 31, 42, 51, 62, 71,82,91,88,77,66,55],},
-                {name:'读书指数',type:'line',data:[11, 11, 11, 11, 11, 11, 11,11,11,11,11,11],},
-                {name:'HSE',type:'line',data:[88, 77, 66, 55, 44, 33, 22,33,33,33,33,33],},
-                {name:'出勤指数',type:'line',data:[15, 26, 35, 34, 47, 55, 51,61,32,44,38,29],},
-            ]
+            series: this.seriesData
         };
       myChart3.setOption(option3);
     },
@@ -319,14 +410,7 @@ export default {
                     formatter: '{value}'
                 }
             },
-            series: [
-                {name:'企业文化',type:'line',data:[10, 21, 32, 41, 52, 61, 72,81,78,67,56,45],},
-                {name:'学习指数',type:'line',data:[55, 55, 55, 55, 55, 55, 55,55,55,77,88,55],},
-                {name:'精益指数',type:'line',data:[20, 31, 42, 51, 62, 71,82,91,88,77,66,55],},
-                {name:'读书指数',type:'line',data:[11, 11, 11, 11, 11, 11, 11,11,11,11,11,11],},
-                {name:'HSE',type:'line',data:[88, 77, 66, 55, 44, 33, 22,33,33,33,33,33],},
-                {name:'出勤指数',type:'line',data:[15, 26, 35, 34, 47, 55, 51,61,32,44,38,29],},
-            ]
+            series: this.seriesData2
         };
       myChart4.setOption(option4);
     },
@@ -362,13 +446,7 @@ export default {
                 type: 'pie',
                 radius : '55%',
                 center: ['40%', '50%'],
-                data: [ {value:33, name:'企业文化'},
-                        {value:31, name:'学习指数'},
-                        {value:23, name:'精益指数'},
-                        {value:13, name:'读书指数'},
-                        {value:15, name:'HSE'},
-                        {value:15, name:'出勤指数'},
-                      ],
+                data: this.dataChart3,
                 itemStyle: {
                     emphasis: {
                         shadowBlur: 10,

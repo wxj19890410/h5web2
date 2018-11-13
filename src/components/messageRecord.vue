@@ -17,13 +17,13 @@
             style="margin-right:30px;"
             placeholder="选择月">
           </el-date-picker>
-          <el-button icon="el-icon-search"  circle></el-button>
+          <el-button icon="el-icon-search"  circle @click = "searchData()" ></el-button>
         </div>
         <el-button type="primary" style="height:40px;" round>更新数据</el-button>
       </div>
       <div style="width:100%;margin-left:0%;">
         <template >
-          <el-table :data="tableData" stripe border :default-sort = "{prop: 'date', order: 'descending'}" ><el-table-column prop="ID" label="系统id" sortable ></el-table-column><el-table-column prop="Name" label="姓名" ></el-table-column><el-table-column prop="PhoneNumber"  label="手机号码"></el-table-column><el-table-column prop="Content"  label="内容" sortable></el-table-column><el-table-column prop="SendTime" sortable label="推送时间"></el-table-column><el-table-column prop="Account" sortable label="推送账号"></el-table-column><el-table-column prop="Status" sortable label="状态"></el-table-column>
+          <el-table :data="tableData" stripe border :default-sort = "{prop: 'date', order: 'descending'}" ><el-table-column prop="userid" label="系统id" sortable ></el-table-column><el-table-column prop="name" label="姓名" ></el-table-column><el-table-column prop="mobile"  label="手机号码"></el-table-column><el-table-column prop="content"  label="内容" sortable></el-table-column><el-table-column prop="createDate" sortable label="推送时间"></el-table-column><el-table-column prop="createName" sortable label="推送账号"></el-table-column><el-table-column prop="state" sortable label="状态"></el-table-column>
           </el-table>
         </template>
       </div>
@@ -32,10 +32,9 @@
         @current-change="handleCurrentChange"
         :current-page="currentPage"
         style="margin-top:20px;"
-        :page-sizes="[2, 4, 6, 8]"
-        :page-size="100"
+        :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="tableData.length">
+        :total="count">
       </el-pagination>
 
  
@@ -51,11 +50,13 @@ export default {
   name: 'systemList',
   data () {
     return {
-      tableData: [{ID:"12",Name:"王大妈",PhoneNumber:"12345678954",Content:"周五晚上九点开会",SendTime:"2018/10/12",Account:"13525658954",Status:"已发送",},{ID:"12",Name:"王大妈",PhoneNumber:"12345678954",Content:"周五晚上九点开会",SendTime:"2018/10/12",Account:"13525658954",Status:"已发送",},{ID:"12",Name:"王大妈",PhoneNumber:"12345678954",Content:"周五晚上九点开会",SendTime:"2018/10/12",Account:"13525658954",Status:"已发送",},{ID:"12",Name:"王大妈",PhoneNumber:"12345678954",Content:"周五晚上九点开会",SendTime:"2018/10/12",Account:"13525658954",Status:"已发送",},{ID:"12",Name:"王大妈",PhoneNumber:"12345678954",Content:"周五晚上九点开会",SendTime:"2018/10/12",Account:"13525658954",Status:"已发送",},{ID:"12",Name:"王大妈",PhoneNumber:"12345678954",Content:"周五晚上九点开会",SendTime:"2018/10/12",Account:"13525658954",Status:"已发送",},{ID:"12",Name:"王大妈",PhoneNumber:"12345678954",Content:"周五晚上九点开会",SendTime:"2018/10/12",Account:"13525658954",Status:"已发送",},{ID:"12",Name:"王大妈",PhoneNumber:"12345678954",Content:"周五晚上九点开会",SendTime:"2018/10/12",Account:"13525658954",Status:"已发送",},],
+      count: 0,
+      pageSize: 20,
+      currentPage: 1,
+      tableData: [],
       valueMonth:'',
       inputSearch:'',
-      currentPage:2,
-    
+      time: ''
     }
   },
   mounted(){
@@ -63,19 +64,51 @@ export default {
     $(".component-page").height($(window).height()-120)
     this.animatePage()
   },
+  created () {
+    this.initData()
+  },
+  watch:{
+    valueMonth:function(){
+      var datetime=this.valueMonth.getFullYear() + '年' + (this.valueMonth.getMonth() + 1) +"月"
+      this.time = datetime
+    }
+  },
   methods:{
+    searchData () {
+      this.initData()
+    },
+    initData () {
+      const params = {}
+      params.month = this.time
+      params.inputSearch = this.inputSearch
+      params.start = (this.currentPage - 1) * this.pageSize
+      params.length = this.pageSize
+      this.$http.get('/huoli/data/msgHistoryDatagrid', {params: params}).then(({ data }) => {
+        if (data) {
+          this.tableData = data.rows
+          this.count = data.count
+        } else {
+          this.$message({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
     animatePage(){
       $(".component-page").animate({
       　　"opacity":"1",
       　　"left":"220px"
       },500);
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+    handleSizeChange (val) {
+      this.currentPage = val
+      this.initData()
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
-    },
+    handleCurrentChange (val) {
+      this.currentPage = val
+      this.initData()
+    }
   }
 }
 </script>

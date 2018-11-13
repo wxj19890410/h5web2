@@ -13,7 +13,7 @@
 		
 		<div class="login-input">
 			<el-input
-			    placeholder="请输入密码"
+			    placeholder="请输入密码" type="password"
 			    v-model="loginForm.password">
 			</el-input>
 			<img src="../assets/password.png">
@@ -83,6 +83,7 @@ export default {
           let yearDate = now.getFullYear()
           let monthDate = now.getMonth()
           const today = {}
+          today.year = yearDate
           today.month = yearDate + '年'+ monthDate +"月"
           today.monthDate = yearDate + '-'+ monthDate
           this.$store.commit('today', today)

@@ -6,6 +6,7 @@ Vue.use(Vuex)
 const state = {
   userInfo: {},
   today: {
+    year: '',
     month: '',
     monthDate: ''
   },

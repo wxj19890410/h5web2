@@ -32,6 +32,8 @@
           placeholder="选择月">
         </el-date-picker>
         <el-button icon="el-icon-search"  @click = "searchData()" circle></el-button>
+        <el-button @click = "setResultData()">计算</el-button>
+        <el-button @click="sendMsg()">推送</el-button>
       </div>
 
       <div style="width:100%;margin-left:0%;">
@@ -85,7 +87,7 @@
             <el-table-column label="操作">
               <template slot-scope="scope">
                 <el-button
-                  size="mini"
+                  size="mini" disabled
                   @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
               </template>
             </el-table-column>
@@ -121,12 +123,14 @@ export default {
       upLoadData: {month: this.$store.state.today.month},
       pageSize: 10,
       time: this.$store.state.today.month,
-      tableData0:{date: '2016-05-02',Name: '王小虎',Reading: 11,Study:22,Attendance:23,HSE:91,Culture:96,Attendance:35,},
+      tableData0: {},
       tableData: [],
       count: 0,
       valueMonth: this.$store.state.today.monthDate,
       inputSearch:'',
       currentPage:1,
+      content:'上月活跃指数已发发布',
+      showDialog: false
     }
   },
   created () {
@@ -146,6 +150,43 @@ export default {
     }
   },
   methods:{
+    sendMsg(){
+      const params = {}
+      params.content = this.content
+      params.month = this.time
+      //展示源数据
+      this.$http.get('/huoli/wxData/sendMsg', {params: params}).then(({ data }) => {
+        if (data) {
+          this.$message({
+            type: 'success',
+            message: '发送成功'
+          })
+        } else {
+          this.$message({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
+    setResultData(){
+      const params = {}
+      params.month = this.time
+      //展示处理数据
+      this.$http.get('/huoli/data/setAverageData', {params: params}).then(({ data }) => {
+        if (data) {
+          this.$message.success({
+            type: 'success',
+            message: '计算成功'
+          })
+        } else {
+          this.$message.error({
+            type: 'error',
+            message: data.message
+          })
+        }
+      })
+    },
     searchData () {
       this.getResturants()
     },
@@ -161,7 +202,7 @@ export default {
           this.tableData = data.rows
           this.count = data.count
         } else {
-          this.$message({
+          this.$message.error({
             type: 'error',
             message: data.message
           })
@@ -181,22 +222,24 @@ export default {
       　　"left":"220px"
       },500);
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+    handleSizeChange (val) {
+      this.currentPage = val
+      this.setResultData()
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
+    handleCurrentChange (val) {
+      this.currentPage = val
+      this.setResultData()
     },
     handleDelete(index, row) {
       console.log(index, row);
     },
     handleEdit(index, row) {
-      console.log(index, row);
       var that = this
+      this.tableData0 = row
       const h = this.$createElement;
         this.$msgbox({
           title: '修改',
-          message: "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>日期:</span><input disabled value='"  +that.tableData0.date  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>" + "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>姓名:</span><input disabled value='"  +that.tableData0.Name  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>"+"<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>读书指数:</span><input value='"  +that.tableData0.Reading  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>" + "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>学习成长:</span><input value='"  +that.tableData0.Study  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>" + "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>出勤指数:</span><input value='"  +that.tableData0.Attendance  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>" + "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>HSE:</span><input value='"  +that.tableData0.HSE  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>"+"<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>企业文化:</span><input value='"  +that.tableData0.Culture  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>",
+          message: "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>日期:</span><input disabled value='"  +that.tableData0.month  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>" + "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>姓名:</span><input disabled value='"  +that.tableData0.userName  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>"+"<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>读书指数:</span><input value='"  +that.tableData0.read  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>" + "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>学习成长:</span><input value='"  +that.tableData0.study  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>" + "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>出勤指数:</span><input value='"  +that.tableData0.attendance  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>" + "<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>HSE:</span><input value='"  +that.tableData0.hse  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>"+"<div><span style='width:100px;display: inline-block;text-align: right;height:40px;line-height:40px;margin-right:20px;'>企业文化:</span><input value='"  +that.tableData0.culture  +"' style='height:30px;border:1px solid #878A90;border-radius:5px;padding:0 10px;color:#878A90;'></div>",
           dangerouslyUseHTMLString:true,
           // <el-form ref="ableData0" :model="tableData0" label-width="80px">
     //   <el-form-item label="活动名称">
@@ -210,6 +253,7 @@ export default {
             if (action === 'confirm') {
               instance.confirmButtonLoading = true;
               instance.confirmButtonText = '执行中...';
+              console.log(that)
               setTimeout(() => {
                 done();
                 setTimeout(() => {
