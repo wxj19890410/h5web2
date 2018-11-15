@@ -116,7 +116,7 @@ export default {
   name: 'wechatsList',
   data () {
     return {
-      uploadUrl: '/huoli/file/upload',
+      uploadUrl: 'http://www.whchlor-alkali.com:8083/huoli/file/upload',
       headers: {
         loginUuid: this.$service.localStorage.get('loginUuid')
       },
